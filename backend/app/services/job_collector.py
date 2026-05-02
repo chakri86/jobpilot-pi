@@ -19,7 +19,7 @@ class ScanResult(dict):
 
 def scan_source(db: Session, source: JobSource) -> dict[str, int]:
     connector = get_connector(source.source_type)
-    listings = connector.fetch(source.url)
+    listings = connector.fetch(source.url, source.name)
     profile = db.query(Profile).filter(Profile.user_id == source.user_id).first()
 
     created = 0

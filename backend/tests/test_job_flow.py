@@ -38,3 +38,44 @@ def test_source_scan_creates_scored_jobs(client: TestClient, auth_headers: dict[
     jobs = jobs_response.json()
     assert len(jobs) >= 1
     assert jobs[0]["score"] >= 50
+
+
+def test_mock_source_uses_source_name_for_job_family(
+    client: TestClient,
+    auth_headers: dict[str, str],
+) -> None:
+    client.put(
+        "/api/profile",
+        headers=auth_headers,
+        json={
+            "full_name": "AVKC",
+            "target_role": "Product Manager",
+            "location": "Remote",
+            "experience_years": 5,
+            "skills": ["Product Strategy", "Roadmap", "User Research", "Analytics"],
+            "preferences": {},
+        },
+    )
+
+    source_response = client.post(
+        "/api/sources",
+        headers=auth_headers,
+        json={
+            "name": "Product Manager",
+            "url": "https://www.linkedin.com/jobs/",
+            "source_type": "mock",
+            "enabled": True,
+            "scan_interval_minutes": 5,
+        },
+    )
+    assert source_response.status_code == 201
+
+    source_id = source_response.json()["id"]
+    scan_response = client.post(f"/api/sources/{source_id}/scan", headers=auth_headers)
+    assert scan_response.status_code == 200
+
+    jobs_response = client.get("/api/jobs?role=Product", headers=auth_headers)
+    assert jobs_response.status_code == 200
+    jobs = jobs_response.json()
+    assert {job["title"] for job in jobs} == {"AI Product Manager", "Technical Product Manager"}
+    assert jobs[0]["score"] > 0

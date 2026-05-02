@@ -401,8 +401,8 @@ function Sources({ token }) {
       <div className="panel">
         <ViewHeader title="Sources" />
         <form onSubmit={addSource} className="form-grid">
-          <label>Name<input value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
-          <label>URL<input value={form.url} onChange={(event) => setForm({ ...form, url: event.target.value })} /></label>
+          <label>Name<input placeholder="product manager" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label>
+          <label>URL<input placeholder="https://example.com/jobs/product-manager" value={form.url} onChange={(event) => setForm({ ...form, url: event.target.value })} /></label>
           <label>Interval<input type="number" min="5" value={form.scan_interval_minutes} onChange={(event) => setForm({ ...form, scan_interval_minutes: Number(event.target.value) })} /></label>
           <label className="check-row"><input type="checkbox" checked={form.enabled} onChange={(event) => setForm({ ...form, enabled: event.target.checked })} />Enabled</label>
           <button className="primary-btn" type="submit"><Plus size={18} />Add source</button>
@@ -417,6 +417,7 @@ function Sources({ token }) {
               <span>
                 <strong>{source.name}</strong>
                 <small>{source.url}</small>
+                <span className="source-meta">{source.source_type === 'mock' ? 'Safe demo' : source.source_type}</span>
               </span>
               <button className="secondary-btn" onClick={() => scan(source.id)}><RefreshCw size={18} />Scan</button>
             </div>

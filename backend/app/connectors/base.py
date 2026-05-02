@@ -16,5 +16,5 @@ class JobListing:
 
 
 class BaseJobConnector:
-    def fetch(self, source_url: str) -> list[JobListing]:
+    def fetch(self, source_url: str, source_name: str | None = None) -> list[JobListing]:
         raise NotImplementedError
