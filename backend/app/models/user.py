@@ -24,7 +24,7 @@ class User(Base):
         nullable=False,
     )
 
-    profile = relationship("Profile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    profiles = relationship("Profile", back_populates="user", cascade="all, delete-orphan")
     sources = relationship("JobSource", back_populates="user", cascade="all, delete-orphan")
     jobs = relationship("Job", back_populates="user", cascade="all, delete-orphan")
     applications = relationship("Application", back_populates="user", cascade="all, delete-orphan")

@@ -7,7 +7,7 @@ The MVP focuses on safe job discovery, matching, profile management, and assiste
 ## Features
 
 - Local authentication with a first-run bootstrap admin
-- Profile management with resume upload validation
+- Multiple job profiles per account with separate target roles, skills, preferences, and resumes
 - URL-based job source management with configurable scan intervals
 - Background job collection with safe mock connector support
 - Deduplicated job storage in PostgreSQL

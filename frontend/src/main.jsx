@@ -317,22 +317,56 @@ function JobDetail({ token, job }) {
 }
 
 function Profile({ token }) {
+  const [profiles, setProfiles] = useState([])
   const [profile, setProfile] = useState(null)
   const [skills, setSkills] = useState('')
+  const [newProfileName, setNewProfileName] = useState('')
   const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  function selectProfile(nextProfile) {
+    setProfile(nextProfile)
+    setSkills((nextProfile?.skills || []).join(', '))
+    setMessage('')
+    setError('')
+  }
+
+  async function loadProfiles() {
+    const data = await apiRequest('/profiles', { token })
+    setProfiles(data)
+    const current = data.find((item) => item.is_active) || data[0] || null
+    selectProfile(current)
+  }
 
   useEffect(() => {
-    apiRequest('/profile', { token }).then((data) => {
-      setProfile(data)
-      setSkills(data.skills.join(', '))
-    })
+    loadProfiles()
   }, [token])
 
   if (!profile) return <div className="panel"><EmptyState text="Loading profile." /></div>
 
+  async function createProfile(event) {
+    event.preventDefault()
+    const name = newProfileName.trim()
+    if (!name) return
+    const created = await apiRequest('/profiles', {
+      token,
+      method: 'POST',
+      body: {
+        name,
+        target_role: name,
+        skills: [],
+        preferences: {}
+      }
+    })
+    setNewProfileName('')
+    await loadProfiles()
+    selectProfile(created)
+    setMessage('Profile created')
+  }
+
   async function saveProfile(event) {
     event.preventDefault()
-    const data = await apiRequest('/profile', {
+    const data = await apiRequest(`/profiles/${profile.id}`, {
       token,
       method: 'PUT',
       body: {
@@ -342,7 +376,15 @@ function Profile({ token }) {
     })
     setProfile(data)
     setSkills(data.skills.join(', '))
+    setProfiles(profiles.map((item) => item.id === data.id ? data : item))
     setMessage('Profile saved')
+  }
+
+  async function activateProfile() {
+    const data = await apiRequest(`/profiles/${profile.id}/activate`, { token, method: 'POST' })
+    setProfiles(profiles.map((item) => ({ ...item, is_active: item.id === data.id })))
+    setProfile(data)
+    setMessage(`${data.name} is active for matching`)
   }
 
   async function uploadResume(event) {
@@ -350,14 +392,44 @@ function Profile({ token }) {
     if (!file) return
     const formData = new FormData()
     formData.append('resume', file)
-    const data = await apiRequest('/profile/resume', { token, method: 'POST', formData })
+    const data = await apiRequest(`/profiles/${profile.id}/resume`, { token, method: 'POST', formData })
     setMessage(`Resume uploaded: ${data.filename}`)
+    await loadProfiles()
   }
 
   return (
-    <section className="panel narrow-panel">
-      <ViewHeader title="Profile" />
-      <form onSubmit={saveProfile} className="form-grid">
+    <section className="view-grid two-column">
+      <div className="panel">
+        <ViewHeader title="Profiles" />
+        <form onSubmit={createProfile} className="inline-form">
+          <input
+            placeholder="product manager"
+            value={newProfileName}
+            onChange={(event) => setNewProfileName(event.target.value)}
+          />
+          <button className="primary-btn" type="submit"><Plus size={18} />Add</button>
+        </form>
+        <div className="stack-list">
+          {profiles.map((item) => (
+            <button
+              className={profile.id === item.id ? 'profile-row selected' : 'profile-row'}
+              key={item.id}
+              onClick={() => selectProfile(item)}
+            >
+              <span>
+                <strong>{item.name}</strong>
+                <small>{item.target_role || 'No target role yet'}</small>
+                {item.resume_filename && <small>Resume attached</small>}
+              </span>
+              {item.is_active && <span className="source-meta">Active</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="panel">
+        <ViewHeader title="Profile Details" />
+        <form onSubmit={saveProfile} className="form-grid">
+        <label>Profile name<input value={profile.name || ''} onChange={(event) => setProfile({ ...profile, name: event.target.value })} /></label>
         <label>Full name<input value={profile.full_name || ''} onChange={(event) => setProfile({ ...profile, full_name: event.target.value })} /></label>
         <label>Target role<input value={profile.target_role || ''} onChange={(event) => setProfile({ ...profile, target_role: event.target.value })} /></label>
         <label>Location<input value={profile.location || ''} onChange={(event) => setProfile({ ...profile, location: event.target.value })} /></label>
@@ -365,8 +437,11 @@ function Profile({ token }) {
         <label className="full-span">Skills<input value={skills} onChange={(event) => setSkills(event.target.value)} /></label>
         <label className="full-span">Resume<input type="file" accept=".pdf,.doc,.docx,.txt" onChange={uploadResume} /></label>
         <button className="primary-btn" type="submit"><Save size={18} />Save profile</button>
+        <button className="secondary-btn" type="button" onClick={activateProfile}>Use for matching</button>
       </form>
+      {error && <div className="error">{error}</div>}
       {message && <div className="success">{message}</div>}
+      </div>
     </section>
   )
 }

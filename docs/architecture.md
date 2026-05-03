@@ -29,7 +29,7 @@ flowchart LR
 ## Data Model
 
 - `users`: local accounts and authentication state.
-- `profiles`: resume metadata, skills, target role, location, preferences.
+- `profiles`: multiple resume/profile variants per account, including active profile selection.
 - `job_sources`: URL-based source definitions and scan cadence.
 - `jobs`: deduplicated job metadata and match scores.
 - `applications`: user-controlled draft workflow.

@@ -3,9 +3,9 @@ from sqlalchemy.orm import Session
 from app.ai import AIClient
 from app.models.application import Application
 from app.models.job import Job
-from app.models.profile import Profile
 from app.models.qa_memory import QAMemory
 from app.models.user import User
+from app.services.profile_service import get_active_profile
 
 
 def generate_application_pack(
@@ -15,7 +15,7 @@ def generate_application_pack(
     question: str | None = None,
     application: Application | None = None,
 ) -> dict[str, str]:
-    profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+    profile = get_active_profile(db, user.id)
     qa_items = (
         db.query(QAMemory)
         .filter(QAMemory.user_id == user.id)

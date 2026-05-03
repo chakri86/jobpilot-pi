@@ -217,6 +217,13 @@ button {
   gap: 14px;
 }
 
+.inline-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
 .form-grid label {
   display: grid;
   gap: 6px;
@@ -228,6 +235,7 @@ button {
 .form-grid input,
 .form-grid select,
 .form-grid textarea,
+.inline-form input,
 .filter-row input,
 .filter-row select,
 .toolbar select {
@@ -406,6 +414,31 @@ textarea {
   gap: 12px;
 }
 
+.profile-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 74px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+  text-align: left;
+}
+
+.profile-row.selected {
+  border-color: var(--accent);
+  background: #f2faf7;
+}
+
+.profile-row small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
 .memory-row p {
   color: #334155;
   line-height: 1.5;
@@ -499,6 +532,7 @@ textarea {
   }
 
   .form-grid,
+  .inline-form,
   .filter-row,
   .toolbar,
   .source-row {

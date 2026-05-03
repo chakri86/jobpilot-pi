@@ -6,8 +6,8 @@ from app.connectors.registry import get_connector
 from app.models.common import utc_now
 from app.models.job import Job
 from app.models.job_source import JobSource
-from app.models.profile import Profile
 from app.services.matching import score_listing
+from app.services.profile_service import get_active_profile
 
 
 class ScanResult(dict):
@@ -20,7 +20,7 @@ class ScanResult(dict):
 def scan_source(db: Session, source: JobSource) -> dict[str, int]:
     connector = get_connector(source.source_type)
     listings = connector.fetch(source.url, source.name)
-    profile = db.query(Profile).filter(Profile.user_id == source.user_id).first()
+    profile = get_active_profile(db, source.user_id)
 
     created = 0
     updated = 0
